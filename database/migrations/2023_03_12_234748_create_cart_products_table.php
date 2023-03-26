@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id')->unsigned();
             $table->integer('product_id')->unsigned();
+            $table->string('product_name');
             $table->integer('cart_id')->unsigned();
             $table->integer('amount')->unsigned();
             $table->timestamps();

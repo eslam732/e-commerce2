@@ -76,15 +76,25 @@ class UserController extends Controller
             if (!$cart) {
                 return response()->json(['cart was not found'], 404);
             }
-            $order = Order::where('cart_id', request()->cartId)->where('user_id',Auth()->id())->first();
-           if ($order){
-            return response()->json(['allready ordered'=>$order], 400);
-           }
+            $order = Order::where('cart_id', request()->cartId)->where('user_id', Auth()->id())->first();
+            if ($order) {
+                return response()->json(['allready ordered' => $order], 400);
+            }
 
-           $order = Order::create(['user_id'=>Auth()->id(),'cart_id'=>request()->cartId]);
-           return response()->json(['Ordered'=>$order], 201);
+           
+            for ($i = 0; $i < count($cart->cart_products); $i++) {
+                if ($cart->cart_products[$i]->amount > $cart->cart_products[$i]->product->quantity) {
+                    return response()->json(
+                        ['amount of this product is more than in the shop' => $cart->cart_products[$i]], 400);
+                }
+            }   
 
-        } catch (\Exception $e) {
+            $order = Order::create(['user_id' => Auth()->id(), 'cart_id' => request()->cartId]);
+            $cart->state="ordered";
+            $cart->save();
+            return response()->json(['Ordered' => $order], 201);
+
+        } catch (\Exception$e) {
             return response()->json(['some error has occured' => $e->getMessage()], 500);
         }
 
@@ -149,6 +159,10 @@ class UserController extends Controller
             if ($cart->user_id != Auth()->id()) {
                 return response()->json(['not allowed'], 405);
             }
+            //delete cartProducts
+
+
+          CartProducts::where('cart_id',request()->cartId)->delete();
 
             $cart->delete();
             return response()->json(['removed'], 200);

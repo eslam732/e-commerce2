@@ -20,7 +20,9 @@ class Product extends Model
         
     ];
 
-
+    protected $hidden = [
+        'user_id',
+    ];
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -33,7 +35,7 @@ class Product extends Model
 
     public function cart_products()
     {
-        return $this->belongsToMany(CartProducts::class);
+        return $this->hasMany(CartProducts::class);
     }
     public function product_comments()
     {
